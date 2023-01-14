@@ -2,13 +2,14 @@
 
   <b-list-group>
     <b-list-group-item>
-      {{user.name}}
-      <b-avatar  variant="info" size="3rem"></b-avatar>
+      {{ user.name }}
+      <b-avatar variant="info" size="3rem"></b-avatar>
       <b-button
-          class="mx-2 my-2"
           v-for="card in cards" :key="card"
+          :class="[card === this.clicked?  '':'min-button', 'mx-2 my-2' ]"
           @click="choose(card)"
-          :variant="clicked === card? 'primary' : 'outline-primary'">
+          :variant="card === this.clicked? 'primary':'outline-primary' "
+      >
         <b-img v-if="card.text === 'coffee'" :src="require('@/assets/icons8-cafe-24.png')"></b-img>
         <span v-else>{{ card.text }}</span>
       </b-button>
@@ -22,6 +23,8 @@ export default {
   name: "cards",
   props: {
     user: {},
+  },
+  computed: {
   },
   data() {
     return {
@@ -49,5 +52,9 @@ export default {
 </script>
 
 <style scoped>
-
+.min-button:hover{
+  background-color: white;
+  color: #007bff;
+  border-color: #007bff;
+}
 </style>
