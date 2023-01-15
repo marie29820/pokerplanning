@@ -2,7 +2,6 @@
 
   <b-list-group>
     <b-list-group-item>
-      {{ user.name }}
       <b-avatar variant="info" size="3rem"></b-avatar>
       <b-button
           v-for="card in cards" :key="card"

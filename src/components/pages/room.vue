@@ -21,8 +21,6 @@
         </div>
       </b-col>
     </b-row>
-
-    <!--${360 / players.length * i}-->
     <div class="fixed-bottom">
       <b-row class="text-center">
         <b-col>
@@ -37,6 +35,9 @@
 
 
 import Cards from "@/components/widget/cards.vue";
+import {pokerPlanningApi} from "@/service";
+import {mapState} from "pinia";
+import {messageStore} from "@/store";
 
 export default {
   components: {Cards},
@@ -46,23 +47,32 @@ export default {
       windowWidth: window.innerWidth,
       user: {},
       players: [
-        {id: 1234567892, name: 'cedric'},
-        {id: 1, name: 'gerard', card: 'hidden'},
-        {id: 2, name: 'gerard2'},
-        {id: 3, name: 'gerard3'},
-        {id: 4, name: 'gerard4'},
-        {id: 5, name: 'gerard', card: 'hidden'},
-        {id: 6, name: 'gerard2'},
-        {id: 7, name: 'gerard3'},
-        {id: 8, name: 'gerard4'},
-        {id: 9, name: 'gerard2'},
-        {id: 10, name: 'gerard3'},
+        // {id: 1234567892, name: 'cedric'},
+        // {id: 1, name: 'gerard', card: 'hidden'},
+        // {id: 2, name: 'gerard2'},
+        // {id: 3, name: 'gerard3'},
+        // {id: 4, name: 'gerard4'},
+        // {id: 5, name: 'gerard', card: 'hidden'},
+        // {id: 6, name: 'gerard2'},
+        // {id: 7, name: 'gerard3'},
+        // {id: 8, name: 'gerard4'},
+        // {id: 9, name: 'gerard2'},
+        // {id: 10, name: 'gerard3'},
 
       ],
     };
   },
+  computed: {
+    ...mapState(messageStore, ['room', 'player'])
+  },
+  watch: {
+    room(room) {
+      this.players.push(...room.players)
+    },
+  },
   created() {
-    this.user = {id: 1234567892, name: 'cedric'}
+    pokerPlanningApi.addPlayer(this.room.id, this.player)
+    this.user = {id: this.player.id, name: this.player.name}
   },
   methods: {
     calculerTranslateX() {
@@ -84,14 +94,13 @@ export default {
       }
     },
     updateCard(card) {
-       this.players.map(p => {
-        if(p.id === this.user.id){
-          p.card = card.text? 'hidden':'';
+      this.players.map(p => {
+        if (p.id === this.user.id) {
+          p.card = card.text ? 'hidden' : '';
           p.value = card.text
         }
       });
-
-    }
+    },
   }
 };
 </script>

@@ -10,5 +10,10 @@ export default createRouter({
       path: routes.room,
       component: pages.room,
     },
+    {
+      name: routesNames.home,
+      path: routes.home,
+      component: pages.home,
+    },
   ],
 })
