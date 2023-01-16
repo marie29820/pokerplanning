@@ -7,12 +7,12 @@
              ${calculerTranslateY(windowHeight)})`}">
           <div :style="{transform: `rotate(${360 - (360 / players.length * i)}deg) translate(0,0)`}">
             <b-avatar
-                v-if="player.card !== 'reveal'"
+                v-if="step === 'HIDDEN'"
                 size="3rem"
                 :variant="getAvatarStyle(player)"></b-avatar>
             <b-button
                 disabled
-                v-if="player.card === 'reveal'"
+                v-if="step === 'REVEAL'"
                 variant="primary">
               {{ player.value }}
             </b-button>
@@ -28,6 +28,15 @@
         </b-col>
       </b-row>
     </div>
+    <b-modal ref="my-modal" hide-footer title="Give me your name">
+      <b-input-group prepend="Username" class="mt-3">
+        <b-form-input v-model="user.name"></b-form-input>
+        <b-input-group-append>
+          <b-button variant="success" @click="createPlayer()">Play
+          </b-button>
+        </b-input-group-append>
+      </b-input-group>
+    </b-modal>
   </b-container>
 </template>
 
@@ -36,8 +45,9 @@
 
 import Cards from "@/components/widget/cards.vue";
 import {pokerPlanningApi} from "@/service";
-import {mapState} from "pinia";
+import {mapActions, mapState} from "pinia";
 import {messageStore} from "@/store";
+import {uuid} from "vue-uuid";
 
 export default {
   components: {Cards},
@@ -45,36 +55,41 @@ export default {
     return {
       windowHeight: window.innerHeight,
       windowWidth: window.innerWidth,
-      user: {},
-      players: [
-        // {id: 1234567892, name: 'cedric'},
-        // {id: 1, name: 'gerard', card: 'hidden'},
-        // {id: 2, name: 'gerard2'},
-        // {id: 3, name: 'gerard3'},
-        // {id: 4, name: 'gerard4'},
-        // {id: 5, name: 'gerard', card: 'hidden'},
-        // {id: 6, name: 'gerard2'},
-        // {id: 7, name: 'gerard3'},
-        // {id: 8, name: 'gerard4'},
-        // {id: 9, name: 'gerard2'},
-        // {id: 10, name: 'gerard3'},
-
-      ],
+      user: {id: uuid.v1(), name: null},
+      players: [],
+      step: 'HIDDEN',
     };
   },
   computed: {
     ...mapState(messageStore, ['room', 'player'])
   },
-  watch: {
-    room(room) {
-      this.players.push(...room.players)
-    },
+  mounted() {
+    this.players.push(...this.room.players)
+    if (!this.player) {
+      // - rejoint le game
+      this.$refs['my-modal'].show()
+    } else if(!this.player.connected) {
+      // - a créé la partie
+      this.user.name = this.player.name
+      this.createPlayer();
+    }
   },
   created() {
-    pokerPlanningApi.addPlayer(this.room.id, this.player)
-    this.user = {id: this.player.id, name: this.player.name}
+  },
+  watch: {
+    room(room) {
+      this.players = [];
+      this.players.push(...room.players)
+      this.step = room.step
+    },
   },
   methods: {
+    ...mapActions(messageStore, ['setPlayer']),
+    createPlayer() {
+      this.setPlayer({id: this.user.id, name: this.user.name, connected: true})
+      pokerPlanningApi.addPlayer(this.$route.params.id, this.player)
+      this.$refs['my-modal'].hide()
+    },
     calculerTranslateX() {
       return 0.15 * this.windowWidth + 'px'
     },
@@ -85,21 +100,11 @@ export default {
       return 0.33 * this.windowHeight + 'px'
     },
     getAvatarStyle(player) {
-      switch (player.card) {
-        case 'hidden':
-        case 'reveal':
-          return "success"
-        default:
-          return "secondary"
-      }
+      return player.card ? "success" : "secondary"
     },
     updateCard(card) {
-      this.players.map(p => {
-        if (p.id === this.user.id) {
-          p.card = card.text ? 'hidden' : '';
-          p.value = card.text
-        }
-      });
+      this.setPlayer({id: this.player.id, name: this.player.name, connected: true, card: card})
+      pokerPlanningApi.play(this.room.id, this.player)
     },
   }
 };

@@ -3,44 +3,67 @@ import {Stomp} from "@stomp/stompjs";
 import {messageStore} from "@/store";
 
 const stomp = "http://localhost:8080/stomp"
-const topic = "/topic/room"
+const roomTopic = "/topic/room/"
 let stompClient = null;
+
 export const pokerPlanningApi = {
 
-  connect() {
-    const store = messageStore();
-    store.connected = false;
-    stompClient = Stomp.over(new SockJS(stomp));
-    stompClient.reconnect_delay = 2000;
-    stompClient.connect(
-      {},
-      frame => {
-        console.log(frame);
-        stompClient.subscribe(topic, message => {
-          store.room = JSON.parse(message.body)
-        });
-        store.connected = true;
-      },
-      error => {
-        console.log(error);
-        store.connected = false;
-      }
+  checkConnection(roomId) {
+      return this.connect(roomId);
+  },
+
+  connect(roomId) {
+    return new Promise(function (resolve, reject) {
+        if (!stompClient || !stompClient.connected) {
+          const store = messageStore();
+          stompClient = Stomp.over(new SockJS(stomp));
+          stompClient.reconnect_delay = 2000;
+          stompClient.connect(
+            {},
+            frame => {
+              console.log(frame);
+              stompClient.subscribe(roomTopic + roomId, message => {
+                store.room = JSON.parse(message.body)
+              });
+              resolve(true);
+            },
+            error => {
+              console.log(error);
+              reject(new Error("connection KO"))
+            }
+          );
+        } else {
+          resolve(true);
+        }
+    });
+  },
+
+  create(roomId) {
+    this.checkConnection(roomId).then(
+      () => stompClient.send("/room/" + roomId, {}),
+      error => alert(error) // ne se lance pas
     );
   },
-  create() {
-    if (stompClient && stompClient.connected) {
-      stompClient.send("/room/create", {});
-    }
+  play(roomId, player) {
+    this.checkConnection(roomId).then(
+      () => stompClient.send("/room/" + roomId + "/play", {}, JSON.stringify({
+        id: player.id,
+        name: player.name,
+        card: player.card
+      })),
+      error => alert(error) // ne se lance pas
+    );
   },
   addPlayer(roomId, player) {
-    if (stompClient && stompClient.connected) {
-      stompClient.send("/room/addPlayer", {}, JSON.stringify({
-        roomId: roomId,
+    this.checkConnection(roomId).then(
+      () => stompClient.send("/room/" + roomId + "/addPlayer", {}, JSON.stringify({
         id: player.id,
         name: player.name
-      }));
-    }
+      })),
+      error => alert(error) // ne se lance pas
+    );
   },
+
   disconnect() {
     if (stompClient) {
       stompClient.disconnect();

@@ -9,8 +9,8 @@
           @click="choose(card)"
           :variant="card === this.clicked? 'primary':'outline-primary' "
       >
-        <b-img v-if="card.text === 'coffee'" :src="require('@/assets/icons8-cafe-24.png')"></b-img>
-        <span v-else>{{ card.text }}</span>
+        <b-img v-if="card.value === 'coffee'" :src="require('@/assets/icons8-cafe-24.png')"></b-img>
+        <span v-else>{{ card.value }}</span>
       </b-button>
     </b-list-group-item>
   </b-list-group>
@@ -29,8 +29,8 @@ export default {
     return {
       clicked: {},
       cards: [
-        {text: '0'}, {text: '1'}, {text: '2'}, {text: '3'}, {text: '5'}, {text: '8'},
-        {text: '13'}, {text: '21'}, {text: '34'}, {text: '55'}, {text: '89'}, {text: '?'}, {text: 'coffee'},
+        {value: '0'}, {value: '1'}, {value: '2'}, {value: '3'}, {value: '5'}, {value: '8'},
+        {value: '13'}, {value: '21'}, {value: '34'}, {value: '55'}, {value: '89'}, {value: '?'}, {value: 'coffee'},
       ],
     };
   },
@@ -44,7 +44,7 @@ export default {
         this.clicked = {}
         this.clicked = card
       }
-      this.$emit('update-card', this.clicked);
+      this.$emit('update-card', this.clicked.value);
     }
   },
 };
