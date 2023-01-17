@@ -10,13 +10,14 @@
                 v-if="step === 'HIDDEN'"
                 size="3rem"
                 :variant="getAvatarStyle(player)"></b-avatar>
-            <b-button
-                disabled
+            <b-avatar
+                size="3rem"
                 v-if="step === 'REVEAL'"
                 variant="primary">
-              {{ player.card }}
-            </b-button>
-            <p style="font-size: 0.8em">{{ player.name }}</p>
+              <span v-if="player.card !== 'coffee'">{{ player.card }}</span>
+              <b-img v-else :src="require('@/assets/icons8-cafe-24.png')"></b-img>
+            </b-avatar>
+            <p class="username">{{ player.name }}</p>
           </div>
         </div>
       </b-col>
@@ -32,7 +33,10 @@
         </b-col>
       </b-row>
     </div>
-    <b-modal ref="my-modal" hide-footer title="Give me your name">
+    <b-modal no-close-on-backdrop
+             no-close-on-esc
+             hide-header-close
+             ref="my-modal" hide-footer title="Give me your name">
       <b-input-group prepend="Username" class="mt-3">
         <b-form-input v-model="user.name"></b-form-input>
         <b-input-group-append>
@@ -137,5 +141,10 @@ export default {
 
 .avatar {
   position: absolute;
+}
+.username{
+  font-family: 'tahoma';
+  font-size: 1em;
+  text-align: center;
 }
 </style>
