@@ -14,7 +14,7 @@
                 disabled
                 v-if="step === 'REVEAL'"
                 variant="primary">
-              {{ player.value }}
+              {{ player.card }}
             </b-button>
             <p style="font-size: 0.8em">{{ player.name }}</p>
           </div>
@@ -24,7 +24,11 @@
     <div class="fixed-bottom">
       <b-row class="text-center">
         <b-col>
-          <cards @update-card="updateCard" :user="user"></cards>
+          <cards
+              @reset-card="resetCard"
+              @update-card="updateCard"
+              @reveal-card="revealCard"
+          ></cards>
         </b-col>
       </b-row>
     </div>
@@ -32,7 +36,7 @@
       <b-input-group prepend="Username" class="mt-3">
         <b-form-input v-model="user.name"></b-form-input>
         <b-input-group-append>
-          <b-button variant="success" @click="createPlayer()">Play
+          <b-button variant="success" @click="validate()">Play
           </b-button>
         </b-input-group-append>
       </b-input-group>
@@ -55,26 +59,36 @@ export default {
     return {
       windowHeight: window.innerHeight,
       windowWidth: window.innerWidth,
+      newGame: false,
       user: {id: uuid.v1(), name: null},
       players: [],
       step: 'HIDDEN',
+      openModal: false
     };
   },
   computed: {
     ...mapState(messageStore, ['room', 'player'])
   },
   mounted() {
-    this.players.push(...this.room.players)
-    if (!this.player) {
-      // - rejoint le game
-      this.$refs['my-modal'].show()
-    } else if(!this.player.connected) {
-      // - a créé la partie
-      this.user.name = this.player.name
-      this.createPlayer();
-    }
-  },
-  created() {
+    pokerPlanningApi.connect(this.$route.params.id).then(
+        () => {
+          this.step = this.room.step
+          if (this.room.players) {
+            this.players.push(...this.room.players)
+          }
+          if (!this.player) {
+            // - rejoint le game
+            this.$refs['my-modal'].show()
+
+          } else if (!this.player.connected) {
+            // - a créé la partie
+            this.user.name = this.player.name
+            this.createPlayer();
+          }
+        },
+        error => alert(error) // ne se lance pas
+    );
+
   },
   watch: {
     room(room) {
@@ -89,6 +103,10 @@ export default {
       this.setPlayer({id: this.user.id, name: this.user.name, connected: true})
       pokerPlanningApi.addPlayer(this.$route.params.id, this.player)
       this.$refs['my-modal'].hide()
+    },
+    validate() {
+      // this.user.name = user.name
+      this.createPlayer();
     },
     calculerTranslateX() {
       return 0.15 * this.windowWidth + 'px'
@@ -106,6 +124,12 @@ export default {
       this.setPlayer({id: this.player.id, name: this.player.name, connected: true, card: card})
       pokerPlanningApi.play(this.room.id, this.player)
     },
+    revealCard() {
+      pokerPlanningApi.reveal(this.room.id)
+    },
+    resetCard() {
+      pokerPlanningApi.reset(this.room.id)
+    }
   }
 };
 </script>

@@ -2,7 +2,16 @@
 
   <b-list-group>
     <b-list-group-item>
-      <b-avatar variant="info" size="3rem"></b-avatar>
+      <b-button v-if="step !== 'REVEAL'"
+                variant="info"
+                @click="reveal"
+      >Montrer les cartes
+      </b-button>
+      <b-button v-if="step === 'REVEAL'"
+                variant="info"
+                @click="reset"
+      >Recommencer
+      </b-button>
       <b-button
           v-for="card in cards" :key="card"
           :class="[card === this.clicked?  '':'min-button', 'mx-2 my-2' ]"
@@ -18,23 +27,36 @@
 </template>
 
 <script>
+import {mapState} from "pinia";
+import {messageStore} from "@/store";
+
 export default {
   name: "cards",
-  props: {
-    user: {},
-  },
   computed: {
+    ...mapState(messageStore, ['room'])
+  },
+  props:{
+  },
+  watch:{
+    room(room) {
+        this.step = room.step
+    },
+    step(step) {
+      this.clicked = step === 'REVEAL'? {} : this.clicked
+    },
   },
   data() {
     return {
       clicked: {},
+      step: 'HIDDEN',
       cards: [
         {value: '0'}, {value: '1'}, {value: '2'}, {value: '3'}, {value: '5'}, {value: '8'},
         {value: '13'}, {value: '21'}, {value: '34'}, {value: '55'}, {value: '89'}, {value: '?'}, {value: 'coffee'},
       ],
     };
   },
-  async created() {
+  mounted() {
+    this.step = this.room.step
   },
   methods: {
     choose(card) {
@@ -45,13 +67,19 @@ export default {
         this.clicked = card
       }
       this.$emit('update-card', this.clicked.value);
+    },
+    reveal() {
+      this.$emit('reveal-card');
+    },
+    reset() {
+      this.$emit('reset-card');
     }
   },
 };
 </script>
 
 <style scoped>
-.min-button:hover{
+.min-button:hover {
   background-color: white;
   color: #007bff;
   border-color: #007bff;

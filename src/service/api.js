@@ -49,14 +49,26 @@ export const pokerPlanningApi = {
       () => stompClient.send("/room/" + roomId + "/play", {}, JSON.stringify({
         id: player.id,
         name: player.name,
-        card: player.card
+        card: player.card,
       })),
+      error => alert(error) // ne se lance pas
+    );
+  },
+  reveal(roomId) {
+    this.checkConnection(roomId).then(
+      () => stompClient.send("/room/" + roomId + "/reveal", {}),
+      error => alert(error) // ne se lance pas
+    );
+  },
+  reset(roomId) {
+    this.checkConnection(roomId).then(
+      () => stompClient.send("/room/" + roomId + "/reset", {}),
       error => alert(error) // ne se lance pas
     );
   },
   addPlayer(roomId, player) {
     this.checkConnection(roomId).then(
-      () => stompClient.send("/room/" + roomId + "/addPlayer", {}, JSON.stringify({
+      () => stompClient.send("/room/" + roomId + "/player", {}, JSON.stringify({
         id: player.id,
         name: player.name
       })),
