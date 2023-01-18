@@ -8,16 +8,24 @@
           <div :style="{transform: `rotate(${360 - (360 / players.length * i)}deg) translate(0,0)`}">
             <b-avatar
                 v-if="step === 'HIDDEN'"
-                size="3rem"
-                :variant="getAvatarStyle(player)"></b-avatar>
+                :badge="player.name"
+                badge-top
+                badge-offset="-0.7em"
+                :badge-variant="getAvatarStyle(player)"
+                size="4rem"
+            />
             <b-avatar
-                size="3rem"
                 v-if="step === 'REVEAL'"
-                variant="primary">
-              <span v-if="player.card !== 'coffee'">{{ player.card }}</span>
-              <b-img v-else :src="require('@/assets/icons8-cafe-24.png')"></b-img>
+                :badge="player.name"
+                badge-top
+                badge-offset="-0.7em"
+                :badge-variant="getAvatarStyle(player)"
+                size="4rem">
+              <span style="font-size: 2em"
+                    v-if="player.card !== 'coffee'"><b>{{ player.card }}</b>
+              </span>
+              <b-img v-else :src="require('@/assets/icons8-cafe-36.png')"></b-img>
             </b-avatar>
-            <p class="username">{{ player.name }}</p>
           </div>
         </div>
       </b-col>
@@ -29,21 +37,17 @@
               @reset-card="resetCard"
               @update-card="updateCard"
               @reveal-card="revealCard"
-          ></cards>
+          />
         </b-col>
       </b-row>
     </div>
     <b-modal no-close-on-backdrop
              no-close-on-esc
              hide-header-close
-             ref="my-modal" hide-footer title="Give me your name">
-      <b-input-group prepend="Username" class="mt-3">
-        <b-form-input v-model="user.name"></b-form-input>
-        <b-input-group-append>
-          <b-button variant="success" @click="validate()">Play
-          </b-button>
-        </b-input-group-append>
-      </b-input-group>
+             ref="playermodal"
+             hide-footer title="Give me your name"
+    >
+      <modal @add-player="addPlayer"/>
     </b-modal>
   </b-container>
 </template>
@@ -52,19 +56,20 @@
 
 
 import Cards from "@/components/widget/cards.vue";
-import {pokerPlanningApi} from "@/service";
+import {pokerPlanningApi, utils} from "@/service";
 import {mapActions, mapState} from "pinia";
 import {messageStore} from "@/store";
-import {uuid} from "vue-uuid";
+import Modal from "@/components/widget/modal.vue";
 
 export default {
-  components: {Cards},
+  components: {Modal, Cards},
+  mixins: [utils],
   data() {
     return {
       windowHeight: window.innerHeight,
       windowWidth: window.innerWidth,
       newGame: false,
-      user: {id: uuid.v1(), name: null},
+      user: {id: this.uuidv4(), name: null},
       players: [],
       step: 'HIDDEN',
       openModal: false
@@ -74,43 +79,58 @@ export default {
     ...mapState(messageStore, ['room', 'player'])
   },
   mounted() {
-    pokerPlanningApi.connect(this.$route.params.id).then(
-        () => {
-          this.step = this.room.step
-          if (this.room.players) {
-            this.players.push(...this.room.players)
-          }
-          if (!this.player) {
-            // - rejoint le game
-            this.$refs['my-modal'].show()
-
-          } else if (!this.player.connected) {
-            // - a créé la partie
-            this.user.name = this.player.name
-            this.createPlayer();
-          }
-        },
-        error => alert(error) // ne se lance pas
-    );
-
+    // - souscription a la room
+    pokerPlanningApi.subscribe(this.$route.params.id)
+    if (!this.player) {
+      // - rejoint le game
+      this.$refs['playermodal'].show()
+    } else {
+      // - a créé la partie
+      this.step = this.room.step
+      if (!this.player.connected) {
+        // - a créé la partie
+        this.user.name = this.player.name
+        this.createPlayer();
+      }
+      // - F5
+      if (this.room.players) {
+        this.players.push(...this.room.players)
+      }
+    }
   },
   watch: {
     room(room) {
       this.players = [];
       this.players.push(...room.players)
       this.step = room.step
+      if (this.step === 'REVEAL')
+        this.makeToast('info');
     },
   },
   methods: {
-    ...mapActions(messageStore, ['setPlayer']),
+    ...mapActions(messageStore, ['setPlayer', 'setRoom']),
+    makeToast(variant = null) {
+      this.$bvToast.toast('Moyenne du poker planning : ' + this.averageNote(), {
+        noCloseButton: true,
+        autoHideDelay: 5000,
+        variant: variant,
+        solid: true
+      })
+    },
+    averageNote() {
+      let total = this.players.map(p => p.card).filter(c => !isNaN(c) && null !== c)
+          .reduce((acc, cur) => acc + parseInt(cur), 0)
+      let vote = this.players.map(p => p.card).filter(c => !isNaN(c) && null !== c).length;
+      return vote > 0 ? (total / vote).toFixed(1) : 0;
+    },
+    addPlayer(user) {
+      this.user.name = user.name
+      this.createPlayer();
+    },
     createPlayer() {
       this.setPlayer({id: this.user.id, name: this.user.name, connected: true})
       pokerPlanningApi.addPlayer(this.$route.params.id, this.player)
-      this.$refs['my-modal'].hide()
-    },
-    validate() {
-      // this.user.name = user.name
-      this.createPlayer();
+      this.$refs['playermodal'].hide()
     },
     calculerTranslateX() {
       return 0.15 * this.windowWidth + 'px'
@@ -122,7 +142,7 @@ export default {
       return 0.33 * this.windowHeight + 'px'
     },
     getAvatarStyle(player) {
-      return player.card ? "success" : "secondary"
+      return player.card ? "success" : "danger"
     },
     updateCard(card) {
       this.setPlayer({id: this.player.id, name: this.player.name, connected: true, card: card})
@@ -142,7 +162,8 @@ export default {
 .avatar {
   position: absolute;
 }
-.username{
+
+.username {
   font-family: 'tahoma';
   font-size: 1em;
   text-align: center;

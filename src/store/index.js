@@ -11,6 +11,13 @@ export const messageStore = defineStore('messages', {
     setPlayer(player) {
       this.player = player
     },
+    setRoom(room) {
+      this.room = room
+    },
+    reset(){
+      this.player = null
+      this.room = {}
+    }
   },
   persist: {
     enabled: {
