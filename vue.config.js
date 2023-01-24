@@ -1,6 +1,6 @@
 module.exports = {
   chainWebpack: (config) => {
-    publicPath: process.env.NODE_ENV === 'production' ? '/pokerplanning/' : '/'
+    publicPath: '/pokerplanning/'
     config.resolve.alias.set('vue', '@vue/compat')
     config.module
       .rule('vue')
