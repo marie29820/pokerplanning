@@ -1,4 +1,4 @@
-export const base = '/poker-planning/'
+export const base = '/pokerplanning/'
 
 export const routes = {
   home: '/',
