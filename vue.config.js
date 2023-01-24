@@ -1,5 +1,5 @@
 module.exports = {
-  publicPath: '/pokerplanning',
+  
   chainWebpack: (config) => {
     config.resolve.alias.set('vue', '@vue/compat')
     config.module
