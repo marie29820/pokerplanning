@@ -1,5 +1,5 @@
-import { createWebHistory, createRouter } from 'vue-router'
-import { routes, base, routesNames } from '@/config'
+import {createWebHistory, createRouter} from 'vue-router'
+import {routes, base, routesNames} from '@/config'
 import * as pages from '@/components/pages'
 
 export default createRouter({

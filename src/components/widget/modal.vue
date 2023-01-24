@@ -1,6 +1,6 @@
 <template>
   <b-input-group prepend="Username" class="mt-3">
-    <b-form-input v-model="user.name"></b-form-input>
+    <b-form-input v-model="user.name"  :state="nameState"></b-form-input>
     <b-input-group-append>
       <b-button variant="success" @click="validate()">Play
       </b-button>
@@ -10,6 +10,7 @@
 
 <script>
 
+
 export default {
   name: "modal",
   data() {
@@ -17,10 +18,20 @@ export default {
       user: {name: null},
     }
   },
-  methods:{
+  computed: {
+    nameState() {
+      return this.validName();
+    }
+  },
+  methods: {
     validate() {
-      this.$emit('add-player', this.user);
+      if(this.validName()){
+        this.$emit('add-player', this.user);
+      }
     },
+    validName(){
+      return this.user.name?.length > 2 && this.user.name?.length < 8
+    }
   }
 }
 </script>

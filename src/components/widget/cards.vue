@@ -1,5 +1,4 @@
 <template>
-
   <b-list-group>
     <b-list-group-item>
       <b-button v-if="step !== 'REVEAL'"
@@ -15,9 +14,9 @@
       <b-button
           :disabled="disabledcards"
           v-for="card in cards" :key="card"
-          :class="[card === this.clicked?  '':'min-button', 'mx-2 my-2' ] "
+          :class="[card.value === this.clicked.value?  '':'min-button', 'mx-2 my-2' ] "
           @click="choose(card)"
-          :variant="card === this.clicked? 'primary':'outline-primary' "
+          :variant="card.value === this.clicked.value? 'primary':'outline-primary' "
       >
         <b-img v-if="card.value === 'coffee'" :src="require('@/assets/icons8-cafe-24.png')"></b-img>
         <span v-else>{{ card.value }}</span>
@@ -38,6 +37,7 @@ export default {
   },
   watch: {
     room(room) {
+      // - sockjs via store
       this.step = room.step
     },
     step(step) {
@@ -58,20 +58,14 @@ export default {
   },
   mounted() {
     this.step = this.room.step
-    this.$nextTick(() => {
-      this.choose({value: `${this.player.card}`})
-      // this.clicked = {value: `${this.player.card}`}
-    })
+    if(this.player && this.player.card){
+      this.clicked =  {value: this.player.card}
+    }
   },
 
   methods: {
     choose(card) {
-      if (this.clicked === card) {
-        this.clicked = {}
-      } else {
-        this.clicked = {}
-        this.clicked = card
-      }
+      this.clicked = this.clicked === card? {} : card
       this.$emit('update-card', this.clicked.value);
     },
     reveal() {

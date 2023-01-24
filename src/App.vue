@@ -16,7 +16,7 @@ export default {
         this.leaving
     );
   },
-  methods:{
+  methods: {
     leaving() {
       pokerPlanningApi.disconnect();
     }

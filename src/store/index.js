@@ -14,7 +14,7 @@ export const messageStore = defineStore('messages', {
     setRoom(room) {
       this.room = room
     },
-    reset(){
+    reset() {
       this.player = null
       this.room = {}
     }

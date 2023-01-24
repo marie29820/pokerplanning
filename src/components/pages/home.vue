@@ -1,5 +1,5 @@
 <template>
-  <navbar></navbar>
+  <navbar/>
   <b-container class="container">
     <b-row class="text-center" align-v="center">
       <b-col cols="12">

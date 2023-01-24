@@ -1,5 +1,6 @@
 <template>
-  <b-container class="bv-example-row">
+  <invite/>
+  <b-container>
     <b-row class="m-lg-2" align-v="center">
       <b-col class="md-12 d-flex justify-content-center" :style="{paddingTop: calculerPaddingTop()}">
         <div v-for="(player, i) in players" :key="player.id" class="avatar"
@@ -53,16 +54,15 @@
 </template>
 
 <script>
-
-
 import Cards from "@/components/widget/cards.vue";
 import {pokerPlanningApi, utils} from "@/service";
 import {mapActions, mapState} from "pinia";
 import {messageStore} from "@/store";
 import Modal from "@/components/widget/modal.vue";
+import Invite from "@/components/widget/invite.vue";
 
 export default {
-  components: {Modal, Cards},
+  components: {Invite, Modal, Cards},
   mixins: [utils],
   data() {
     return {
@@ -72,7 +72,6 @@ export default {
       user: {id: this.uuidv4(), name: null},
       players: [],
       step: 'HIDDEN',
-      openModal: false
     };
   },
   computed: {
@@ -80,23 +79,26 @@ export default {
   },
   mounted() {
     // - souscription a la room
-    pokerPlanningApi.subscribe(this.$route.params.id)
-    if (!this.player) {
-      // - rejoint le game
-      this.$refs['playermodal'].show()
-    } else {
-      // - a créé la partie
-      this.step = this.room.step
-      if (!this.player.connected) {
-        // - a créé la partie
-        this.user.name = this.player.name
-        this.createPlayer();
-      }
-      // - F5
-      if (this.room.players) {
-        this.players.push(...this.room.players)
-      }
-    }
+    pokerPlanningApi.subscribe(this.$route.params.id).then(
+        () => {
+          if (!this.player) {
+            // - rejoint le game
+            this.$refs['playermodal'].show()
+          } else {
+            // - a créé la partie
+            this.step = this.room.step
+            if (!this.player.connected) {
+              // - a créé la partie
+              this.user.name = this.player.name
+              this.createPlayer();
+            }
+            // - F5
+            if (this.room.players) {
+              this.players.push(...this.room.players)
+            }
+          }
+        }
+    )
   },
   watch: {
     room(room) {
@@ -104,16 +106,16 @@ export default {
       this.players.push(...room.players)
       this.step = room.step
       if (this.step === 'REVEAL')
-        this.makeToast('info');
+        this.makeToast();
     },
   },
   methods: {
     ...mapActions(messageStore, ['setPlayer', 'setRoom']),
-    makeToast(variant = null) {
+    makeToast() {
       this.$bvToast.toast('Moyenne du poker planning : ' + this.averageNote(), {
         noCloseButton: true,
         autoHideDelay: 5000,
-        variant: variant,
+        variant: 'info',
         solid: true
       })
     },
@@ -127,9 +129,9 @@ export default {
       this.user.name = user.name
       this.createPlayer();
     },
-    createPlayer() {
+    async createPlayer() {
       this.setPlayer({id: this.user.id, name: this.user.name, connected: true})
-      pokerPlanningApi.addPlayer(this.$route.params.id, this.player)
+      await pokerPlanningApi.addPlayer(this.$route.params.id, this.player)
       this.$refs['playermodal'].hide()
     },
     calculerTranslateX() {
@@ -144,15 +146,15 @@ export default {
     getAvatarStyle(player) {
       return player.card ? "success" : "danger"
     },
-    updateCard(card) {
+    async updateCard(card) {
       this.setPlayer({id: this.player.id, name: this.player.name, connected: true, card: card})
-      pokerPlanningApi.play(this.room.id, this.player)
+      await pokerPlanningApi.play(this.room.id, this.player)
     },
-    revealCard() {
-      pokerPlanningApi.reveal(this.room.id)
+    async revealCard() {
+      await pokerPlanningApi.reveal(this.room.id)
     },
-    resetCard() {
-      pokerPlanningApi.reset(this.room.id)
+    async resetCard() {
+      await pokerPlanningApi.reset(this.room.id)
     }
   }
 };

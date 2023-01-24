@@ -1,46 +1,36 @@
 <template>
-  <b-modal
-      ref="invitemodal"
-      hide-footer title="Copy link to share"
-  >
-    <b-input-group class="mt-3">
-      <b-form-input ref="urlinput" v-model="url"/>
-      <b-input-group-append>
-        <b-button variant="success" @click="copy()">Copy</b-button>
-      </b-input-group-append>
-    </b-input-group>
-  </b-modal>
+  <b-button size="sm"
+            variant="primary"
+            class="my-2 my-sm-0 invitebutton"
+            @click="copy">Invite friends
+  </b-button>
 </template>
 
 <script>
 export default {
   name: "invite",
-  props: {
-    openInvite: Boolean
-  },
   data() {
     return {
       url: window.location.href,
     }
   },
-  watch: {
-    openInvite(open) {
-      if (open)
-        this.$refs['invitemodal'].show()
-      else this.$refs['invitemodal'].hide()
-    }
-  },
   methods: {
     copy() {
-      this.$refs.urlinput.focus();
-      this.$refs.urlinput.select()
-      document.execCommand('copy');
+      navigator.clipboard.writeText(this.url)
+      this.$bvToast.toast("L'url a été copiée dans le presse papier", {
+        noCloseButton: true,
+        autoHideDelay: 5000,
+        variant: 'info',
+        solid: true
+      })
     },
-
   }
 }
 </script>
 
 <style scoped>
-
+.invitebutton{
+  float: right;
+  margin: 10px;
+}
 </style>
