@@ -2,7 +2,7 @@ import SockJS from "sockjs-client";
 import {Stomp} from "@stomp/stompjs";
 import {messageStore} from "@/store";
 
-const stomp = "https://44.207.3.141/pokerplanning/stomp"
+const stomp = "http://poker-lb-1958751384.us-east-1.elb.amazonaws.com:8080/pokerplanning/stomp"
 const roomTopic = "/topic/room/"
 
 let stompClient = null;
