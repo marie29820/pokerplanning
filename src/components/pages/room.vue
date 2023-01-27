@@ -60,6 +60,7 @@ import {mapActions, mapState} from "pinia";
 import {messageStore} from "@/store";
 import Modal from "@/components/widget/modal.vue";
 import Invite from "@/components/widget/invite.vue";
+import {PLAYER_ACTION} from "@/config/wordings";
 
 export default {
   components: {Invite, Modal, Cards},
@@ -79,7 +80,7 @@ export default {
   },
   mounted() {
     // - souscription a la room
-    pokerPlanningApi.subscribe(this.$route.params.id).then(
+    pokerPlanningApi.subscribeRoom(this.$route.params.id).then(
         () => {
           if (!this.player) {
             // - rejoint le game
@@ -131,7 +132,7 @@ export default {
     },
     async createPlayer() {
       this.setPlayer({id: this.user.id, name: this.user.name, connected: true})
-      await pokerPlanningApi.addPlayer(this.$route.params.id, this.player)
+      await pokerPlanningApi.switchPlayer(this.$route.params.id, this.player, PLAYER_ACTION.ADD)
       this.$refs['playermodal'].hide()
     },
     calculerTranslateX() {
@@ -151,10 +152,10 @@ export default {
       await pokerPlanningApi.play(this.room.id, this.player)
     },
     async revealCard() {
-      await pokerPlanningApi.reveal(this.room.id)
+      await pokerPlanningApi.revealGame(this.room.id)
     },
     async resetCard() {
-      await pokerPlanningApi.reset(this.room.id)
+      await pokerPlanningApi.resetGame(this.room.id)
     }
   }
 };

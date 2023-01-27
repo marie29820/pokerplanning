@@ -43,7 +43,6 @@ export default {
   },
   created() {
     this.reset()
-    pokerPlanningApi.disconnect();
   },
   computed: {
     ...mapState(messageStore, ['room']),
@@ -59,7 +58,7 @@ export default {
         pokerPlanningApi.connect(
             stompClient => this.subscribe(uuid, stompClient))
             .then(
-                () => pokerPlanningApi.create(uuid));
+                () => pokerPlanningApi.createRoom(uuid));
       }
     },
     subscribe(uuid, stompClient) {

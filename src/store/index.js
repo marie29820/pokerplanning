@@ -3,7 +3,7 @@ import {defineStore} from 'pinia'
 export const messageStore = defineStore('messages', {
   state: () => {
     return {
-      room: Object,
+      room: {},
       player: null,
     }
   },

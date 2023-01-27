@@ -1,8 +1,9 @@
 import SockJS from "sockjs-client";
 import {Stomp} from "@stomp/stompjs";
 import {messageStore} from "@/store";
+import {PLAYER_ACTION} from "@/config/wordings";
 
-const stomp = "http://tomcat-lb-1477370552.us-east-1.elb.amazonaws.com/pokerplanning/stomp"
+const stomp = "http://localhost:8080/pokerplanning/stomp"
 const roomTopic = "/topic/room/"
 
 let stompClient = null;
@@ -27,10 +28,10 @@ export const pokerPlanningApi = {
       }
     });
   },
-  create(clientId) {
+  createRoom(clientId) {
     stompClient.send("/room/" + clientId, {})
   },
-  subscribe(roomId) {
+  subscribeRoom(roomId) {
     return new Promise((resolve, reject) => {
       const store = messageStore();
       this.connect().then(
@@ -52,47 +53,49 @@ export const pokerPlanningApi = {
             id: player.id,
             name: player.name,
             card: player.card,
+            action: PLAYER_ACTION.PLAY
           })),
       )
         .then(() => resolve(true))
         .catch(error => reject(error))
     })
   },
-  reveal(roomId) {
+  revealGame(roomId) {
     return new Promise((resolve, reject) => {
       this.connect().then(
         () =>
-          stompClient.send("/room/" + roomId + "/reveal", {}),
+          stompClient.send("/room/" + roomId + "/revealGame", {}),
       )
         .then(() => resolve(true))
         .catch(error => reject(error))
     })
   },
-  reset(roomId) {
+  resetGame(roomId) {
     return new Promise((resolve, reject) => {
       this.connect().then(
         () =>
-          stompClient.send("/room/" + roomId + "/reset", {}),
+          stompClient.send("/room/" + roomId + "/resetGame", {}),
         error => alert(error)
       )
         .then(() => resolve(true))
         .catch(error => reject(error))
     })
   },
-  addPlayer(roomId, player) {
+  switchPlayer(roomId, player, PLAYER_ACTION) {
     return new Promise((resolve, reject) => {
       this.connect().then(
         () =>
           stompClient.send("/room/" + roomId + "/player", {}, JSON.stringify({
             id: player.id,
-            name: player.name
+            name: player.name,
+            card: null,
+            action: PLAYER_ACTION
           })),
       )
         .then(() => resolve(true))
         .catch(error => reject(error))
     })
-  }
-  ,
+  },
   disconnect() {
     if (stompClient) {
       stompClient.disconnect();
