@@ -3,7 +3,7 @@ import {Stomp} from "@stomp/stompjs";
 import {messageStore} from "@/store";
 import {PLAYER_ACTION} from "@/config/wordings";
 
-const stomp = "http://localhost:8080/pokerplanning/stomp"
+const stomp = "http://tomcat-lb-1477370552.us-east-1.elb.amazonaws.com/pokerplanning/stomp"
 const roomTopic = "/topic/room/"
 
 let stompClient = null;
@@ -64,7 +64,7 @@ export const pokerPlanningApi = {
     return new Promise((resolve, reject) => {
       this.connect().then(
         () =>
-          stompClient.send("/room/" + roomId + "/revealGame", {}),
+          stompClient.send("/room/" + roomId + "/reveal", {}),
       )
         .then(() => resolve(true))
         .catch(error => reject(error))
@@ -74,7 +74,7 @@ export const pokerPlanningApi = {
     return new Promise((resolve, reject) => {
       this.connect().then(
         () =>
-          stompClient.send("/room/" + roomId + "/resetGame", {}),
+          stompClient.send("/room/" + roomId + "/reset", {}),
         error => alert(error)
       )
         .then(() => resolve(true))

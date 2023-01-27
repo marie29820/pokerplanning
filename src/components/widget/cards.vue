@@ -69,10 +69,10 @@ export default {
       this.$emit('update-card', this.clicked.value);
     },
     reveal() {
-      this.$emit('revealGame-card');
+      this.$emit('revealCard');
     },
     reset() {
-      this.$emit('resetGame-card');
+      this.$emit('resetCard');
     }
   },
 };
