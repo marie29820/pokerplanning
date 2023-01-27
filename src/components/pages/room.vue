@@ -79,23 +79,20 @@ export default {
     ...mapState(messageStore, ['room', 'player'])
   },
   mounted() {
-    // - souscription a la room
+    // - souscription des joueurs aux events de la room
     pokerPlanningApi.subscribeRoom(this.$route.params.id).then(
         () => {
-          if (!this.player) {
-            // - rejoint le game
-            this.$refs['playermodal'].show()
-          } else if (this.player) {
-            // - a créé la partie
+          if (this.player) {
+            // - si le joueur a créé la partie
             this.step = this.room.step
             if (!this.player.connected) {
               this.user.name = this.player.name
+              // - ajout du player a la room
               this.createPlayer();
             }
-          }
-          // - F5
-          if (this.room.players) {
-            this.players.push(...this.room.players)
+          } else if (!this.player) {
+            // - si le joueur rejoint le game
+            this.$refs['playermodal'].show()
           }
         }
     )
@@ -110,7 +107,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(messageStore, ['setPlayer', 'setRoom']),
+    ...mapActions(messageStore, ['setPlayer', 'setRoom', 'setLoading']),
     makeToast() {
       this.$bvToast.toast('Moyenne du poker planning : ' + this.averageNote(), {
         noCloseButton: true,

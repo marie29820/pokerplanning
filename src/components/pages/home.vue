@@ -44,6 +44,8 @@ export default {
   },
   created() {
     const store = messageStore()
+    // - si on revient sur l'ecran home (f5) ou back
+    // - on reinitialise l'ensemble des données
     if (this.room.id && this.player) {
       pokerPlanningApi.switchPlayer(this.room.id, this.player, PLAYER_ACTION.REMOVE).then(
           () => pokerPlanningApi.disconnect()
@@ -58,20 +60,27 @@ export default {
     }
   },
   methods: {
-    ...mapActions(messageStore, ['setPlayer', 'setRoom']),
+    ...mapActions(messageStore, ['setPlayer', 'setRoom', 'setLoading']),
     submit() {
       if (this.nameState) {
+        this.setLoading(true)
         let uuid = this.uuidv4();
         pokerPlanningApi.connect(
             stompClient => this.subscribe(uuid, stompClient))
             .then(
-                () => pokerPlanningApi.createRoom(uuid));
+                // - creation de la room
+                () => {
+                  pokerPlanningApi.createRoom(uuid)
+                  this.setLoading(false)
+                });
       }
     },
     subscribe(uuid, stompClient) {
+      // - souscription du client au topic privé ( => creation de room)
       stompClient.subscribe("/topic/user/" + uuid, message => {
         this.setRoom(JSON.parse(message.body))
         this.setPlayer({name: this.name, id: null, connected: false, master: true})
+        // - debranchement dans la room
         this.$router.push({name: routesNames.room, params: {id: this.room.id}})
       })
     }
