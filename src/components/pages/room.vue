@@ -102,7 +102,7 @@ export default {
   },
   watch: {
     room(room) {
-      this.players = [];
+      this.players.length = 0
       this.players.push(...room.players ?? [])
       this.step = room.step
       if (this.step === 'REVEAL')
