@@ -5,7 +5,8 @@ export const messageStore = defineStore('messages', {
     return {
       room: {},
       player: null,
-      loading: false
+      loading: false,
+
     }
   },
   actions: {

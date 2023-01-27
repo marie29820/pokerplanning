@@ -14,8 +14,8 @@ export const pokerPlanningApi = {
       if (!stompClient || !stompClient.connected) {
         stompClient = Stomp.over(new SockJS(stomp));
         stompClient.reconnect_delay = 2000;
-        stompClient.connect(
-          {}, () => {
+        stompClient.connect({},
+          () => {
             if (callback) {
               callback(stompClient)
             }

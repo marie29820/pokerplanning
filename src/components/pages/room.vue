@@ -79,6 +79,7 @@ export default {
     ...mapState(messageStore, ['room', 'player'])
   },
   mounted() {
+    this.setLoading(true)
     // - souscription des joueurs aux events de la room
     pokerPlanningApi.subscribeRoom(this.$route.params.id).then(
         () => {
@@ -94,13 +95,15 @@ export default {
             // - si le joueur rejoint le game
             this.$refs['playermodal'].show()
           }
+
+          this.setLoading(false)
         }
     )
   },
   watch: {
     room(room) {
       this.players = [];
-      this.players.push(...room.players)
+      this.players.push(...room.players ?? [])
       this.step = room.step
       if (this.step === 'REVEAL')
         this.makeToast();

@@ -42,15 +42,14 @@ export default {
       name: '',
     }
   },
-  created() {
+  async created() {
     const store = messageStore()
     // - si on revient sur l'ecran home (f5) ou back
     // - on reinitialise l'ensemble des données
     if (this.room.id && this.player) {
-      pokerPlanningApi.switchPlayer(this.room.id, this.player, PLAYER_ACTION.REMOVE).then(
-          () => pokerPlanningApi.disconnect()
-      )
+      await pokerPlanningApi.switchPlayer(this.room.id, this.player, PLAYER_ACTION.REMOVE);
     }
+    pokerPlanningApi.disconnect()
     store.$reset()
   },
   computed: {
@@ -66,24 +65,21 @@ export default {
         this.setLoading(true)
         let uuid = this.uuidv4();
         pokerPlanningApi.connect(
-            stompClient => this.subscribe(uuid, stompClient))
-            .then(
-                // - creation de la room
-                () => {
-                  pokerPlanningApi.createRoom(uuid)
-                  this.setLoading(false)
-                });
+            stompClient => {
+              // - souscription au topic privée de reponse a la création d'une room
+              stompClient.subscribe("/topic/user/" + uuid, message => {
+                this.setRoom(JSON.parse(message.body))
+                this.setPlayer({name: this.name, id: null, connected: false, master: true})
+                this.$router.push({name: routesNames.room, params: {id: this.room.id}})
+                this.setLoading(false)
+              })
+            })
+            .then(() => {
+              // - demande de creation de la room
+              pokerPlanningApi.createRoom(uuid)
+            });
       }
     },
-    subscribe(uuid, stompClient) {
-      // - souscription du client au topic privé ( => creation de room)
-      stompClient.subscribe("/topic/user/" + uuid, message => {
-        this.setRoom(JSON.parse(message.body))
-        this.setPlayer({name: this.name, id: null, connected: false, master: true})
-        // - debranchement dans la room
-        this.$router.push({name: routesNames.room, params: {id: this.room.id}})
-      })
-    }
   }
 }
 </script>
@@ -92,11 +88,6 @@ export default {
 .inputname {
   font-family: 'tahoma';
 }
-
-html {
-  background-color: #F9F9F9;
-}
-
 .container {
   margin-top: 15%;
 }

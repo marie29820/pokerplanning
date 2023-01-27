@@ -1,11 +1,8 @@
 <template>
-
-  <div v-if="loader" class="text-center">
-    <b-spinner variant="primary" label="Text Centered"></b-spinner>
+  <div v-if="loader" class="overlay">
+    <b-spinner variant="primary" class="spinner" label="Text Centered"></b-spinner>
   </div>
-  <div id="app" v-if="!loader">
-    <RouterView/>
-  </div>
+  <RouterView/>
 </template>
 
 <script>
@@ -22,8 +19,8 @@ export default {
       loader: false
     }
   },
-  watch : {
-    loading(loading){
+  watch: {
+    loading(loading) {
       this.loader = loading;
     }
   },
@@ -54,4 +51,17 @@ export default {
 }
 </script>
 <style>
+.overlay {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  opacity: 0.7;
+  filter: alpha(opacity=50);
+  background-color: black;
+}
+.spinner{
+  margin-top: 25%;
+  margin-left: 50%;
+}
 </style>
