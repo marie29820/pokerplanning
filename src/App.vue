@@ -24,12 +24,14 @@ export default {
   },
   methods: {
     async leaving() {
+      const store = messageStore()
       // - supprimer le user du groupe
-      if(this.$route.params.id && this.player){
-        await pokerPlanningApi.switchPlayer(this.$route.params.id, this.player, PLAYER_ACTION.REMOVE)
+      if (this.$route.params.id && this.player) {
+        pokerPlanningApi.switchPlayer(this.$route.params.id, this.player, PLAYER_ACTION.REMOVE).then(
+            () =>  pokerPlanningApi.disconnect()
+        )
       }
-      // deconnecter la socket
-      pokerPlanningApi.disconnect();
+      store.$reset()
     }
   }
 }

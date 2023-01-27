@@ -85,18 +85,17 @@ export default {
           if (!this.player) {
             // - rejoint le game
             this.$refs['playermodal'].show()
-          } else {
+          } else if (this.player) {
             // - a créé la partie
             this.step = this.room.step
             if (!this.player.connected) {
-              // - a créé la partie
               this.user.name = this.player.name
               this.createPlayer();
             }
-            // - F5
-            if (this.room.players) {
-              this.players.push(...this.room.players)
-            }
+          }
+          // - F5
+          if (this.room.players) {
+            this.players.push(...this.room.players)
           }
         }
     )

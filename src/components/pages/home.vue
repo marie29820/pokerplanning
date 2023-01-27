@@ -13,7 +13,7 @@
           <b-input-group-append>
             <b-button
                 variant="success"
-                @click="onSubmit"
+                @click="submit"
             >Play
             </b-button>
           </b-input-group-append>
@@ -31,6 +31,7 @@ import {mapActions, mapState} from "pinia";
 import {messageStore} from "@/store";
 import {routesNames} from "@/config";
 import Navbar from "@/components/widget/navbar.vue";
+import {PLAYER_ACTION} from "@/config/wordings";
 
 export default {
   name: "home",
@@ -42,17 +43,23 @@ export default {
     }
   },
   created() {
-    this.reset()
+    const store = messageStore()
+    if (this.room.id && this.player) {
+      pokerPlanningApi.switchPlayer(this.room.id, this.player, PLAYER_ACTION.REMOVE).then(
+          () => pokerPlanningApi.disconnect()
+      )
+    }
+    store.$reset()
   },
   computed: {
-    ...mapState(messageStore, ['room']),
+    ...mapState(messageStore, ['room', 'player']),
     nameState() {
       return this.name.length > 2 && this.name.length < 8
     }
   },
   methods: {
-    ...mapActions(messageStore, ['setPlayer', 'setRoom', 'reset']),
-    onSubmit() {
+    ...mapActions(messageStore, ['setPlayer', 'setRoom']),
+    submit() {
       if (this.nameState) {
         let uuid = this.uuidv4();
         pokerPlanningApi.connect(
@@ -64,7 +71,7 @@ export default {
     subscribe(uuid, stompClient) {
       stompClient.subscribe("/topic/user/" + uuid, message => {
         this.setRoom(JSON.parse(message.body))
-        this.setPlayer({name: this.name, id: null, connected: false})
+        this.setPlayer({name: this.name, id: null, connected: false, master: true})
         this.$router.push({name: routesNames.room, params: {id: this.room.id}})
       })
     }
