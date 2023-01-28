@@ -1,5 +1,5 @@
 <template>
-  <div v-if="loader" class="overlay">
+  <div v-show="loader" class="overlay">
     <b-spinner variant="primary" class="spinner" label="Text Centered"></b-spinner>
   </div>
   <RouterView/>
@@ -26,9 +26,7 @@ export default {
   },
   created() {
     // - reinitialiser l'ensemble des données
-    window.addEventListener(
-        "beforeunload",
-        this.leaving
+    window.addEventListener("beforeunload", this.leaving
     );
   },
   computed: {
@@ -60,7 +58,8 @@ export default {
   filter: alpha(opacity=50);
   background-color: black;
 }
-.spinner{
+
+.spinner {
   margin-top: 25%;
   margin-left: 50%;
 }

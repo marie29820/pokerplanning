@@ -3,7 +3,7 @@ import {Stomp} from "@stomp/stompjs";
 import {messageStore} from "@/store";
 import {PLAYER_ACTION} from "@/config/wordings";
 
-const stomp = "http://tomcat-lb-1477370552.us-east-1.elb.amazonaws.com/pokerplanning/stomp"
+const stomp = "https://44.207.3.141/pokerplanning/stomp"
 const roomTopic = "/topic/room/"
 
 let stompClient = null;
