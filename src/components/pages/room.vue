@@ -79,6 +79,8 @@ export default {
     ...mapState(messageStore, ['room', 'player'])
   },
   mounted() {
+    this.setWindowSize()
+    window.addEventListener('resize', this.setWindowSize)
     this.setLoading(true)
     // - souscription des joueurs aux events de la room
     pokerPlanningApi.subscribeRoom(this.$route.params.id).then(
@@ -91,30 +93,27 @@ export default {
               // - ajout du player a la room
               this.createPlayer();
             }
-          } else if (!this.player) {
+          } else {
             // - si le joueur rejoint le game
             this.$refs['playermodal'].show()
           }
-
           this.setLoading(false)
         }
     )
   },
-  watch: {
-    room(room) {
-      this.players.length = 0
-      this.players.push(...room.players ?? [])
-      this.step = room.step
-      if (this.step === 'REVEAL')
-        this.makeToast();
-    },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.setWindowSize)
   },
   methods: {
     ...mapActions(messageStore, ['setPlayer', 'setRoom', 'setLoading']),
+    setWindowSize() {
+      this.windowHeight = window.innerHeight
+      this.windowWidth = window.innerWidth
+    },
     makeToast() {
       this.$bvToast.toast('Moyenne du poker planning : ' + this.averageNote(), {
         noCloseButton: true,
-        autoHideDelay: 5000,
+        autoHideDelay: 9000,
         variant: 'info',
         solid: true
       })
@@ -156,7 +155,15 @@ export default {
     async resetCard() {
       await pokerPlanningApi.resetGame(this.room.id)
     }
-  }
+  },
+  watch: {
+    room(room) {
+      this.players.length = 0
+      this.players.push(...room.players ?? [])
+      this.step = room.step
+      this.step === 'REVEAL' ? this.makeToast() : null;
+    },
+  },
 };
 </script>
 <style>
@@ -166,7 +173,7 @@ export default {
 }
 
 .username {
-  font-family: 'tahoma';
+  font-family: 'tahoma', sans-serif;
   font-size: 1em;
   text-align: center;
 }

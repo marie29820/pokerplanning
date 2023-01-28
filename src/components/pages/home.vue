@@ -52,6 +52,15 @@ export default {
     pokerPlanningApi.disconnect()
     store.$reset()
   },
+  watch: {
+    room(room) {
+      if(room.id){
+        this.setPlayer({name: this.name, id: null, connected: false})
+        this.$router.push({name: routesNames.room, params: {id: room.id}})
+        this.setLoading(false)
+      }
+    }
+  },
   computed: {
     ...mapState(messageStore, ['room', 'player']),
     nameState() {
@@ -64,20 +73,12 @@ export default {
       if (this.nameState) {
         this.setLoading(true)
         let uuid = this.uuidv4();
-        pokerPlanningApi.connect(
-            stompClient => {
-              // - souscription au topic privée de reponse a la création d'une room
-              stompClient.subscribe("/topic/user/" + uuid, message => {
-                this.setRoom(JSON.parse(message.body))
-                this.setPlayer({name: this.name, id: null, connected: false, master: true})
-                this.$router.push({name: routesNames.room, params: {id: this.room.id}})
-                this.setLoading(false)
-              })
-            })
-            .then(() => {
-              // - demande de creation de la room
-              pokerPlanningApi.createRoom(uuid)
-            });
+        pokerPlanningApi.connect()
+            .then(() =>
+                pokerPlanningApi.subscribePrivateChannel(uuid))
+            .then(() =>
+                pokerPlanningApi.createRoom(uuid)
+            )
       }
     },
   }
@@ -86,7 +87,7 @@ export default {
 
 <style scoped>
 .inputname {
-  font-family: 'tahoma';
+  font-family: 'tahoma',serif;
 }
 .container {
   margin-top: 15%;

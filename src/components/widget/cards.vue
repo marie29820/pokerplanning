@@ -23,9 +23,7 @@
       </b-button>
     </b-list-group-item>
   </b-list-group>
-
 </template>
-
 <script>
 import {mapState} from "pinia";
 import {messageStore} from "@/store";
@@ -34,16 +32,6 @@ export default {
   name: "cards",
   computed: {
     ...mapState(messageStore, ['room', 'player'])
-  },
-  watch: {
-    room(room) {
-      // - sockjs via store
-      this.step = room.step
-    },
-    step(step) {
-      this.clicked = step === 'REVEAL' ? {} : this.clicked
-      this.disabledcards = step === 'REVEAL'
-    },
   },
   data() {
     return {
@@ -58,14 +46,13 @@ export default {
   },
   mounted() {
     this.step = this.room.step
-    if(this.player && this.player.card){
-      this.clicked =  {value: this.player.card}
+    if (this.player && this.player.card) {
+      this.clicked = {value: this.player.card}
     }
   },
-
   methods: {
     choose(card) {
-      this.clicked = this.clicked === card? {} : card
+      this.clicked = this.clicked === card ? {} : card
       this.$emit('update-card', this.clicked.value);
     },
     reveal() {
@@ -74,6 +61,16 @@ export default {
     reset() {
       this.$emit('resetCard');
     }
+  },
+  watch: {
+    room(room) {
+      // - sockjs via store
+      this.step = room.step
+    },
+    step(step) {
+      this.clicked = step === 'REVEAL' ? {} : this.clicked
+      this.disabledcards = step === 'REVEAL'
+    },
   },
 };
 </script>

@@ -5,7 +5,6 @@
             @click="copy">Invite friends
   </b-button>
 </template>
-
 <script>
 export default {
   name: "invite",
@@ -27,7 +26,6 @@ export default {
   }
 }
 </script>
-
 <style scoped>
 .invitebutton{
   float: right;

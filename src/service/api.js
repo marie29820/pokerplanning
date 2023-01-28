@@ -5,28 +5,39 @@ import {PLAYER_ACTION} from "@/config/wordings";
 
 const stomp = "https://44.207.3.141/pokerplanning/stomp"
 const roomTopic = "/topic/room/"
-
 let stompClient = null;
 
 export const pokerPlanningApi = {
-  connect(callback) {
+  connect() {
     return new Promise((resolve, reject) => {
       if (!stompClient || !stompClient.connected) {
         stompClient = Stomp.over(new SockJS(stomp));
         stompClient.reconnect_delay = 2000;
         stompClient.connect({},
-          () => {
-            if (callback) {
-              callback(stompClient)
-            }
-            resolve(true);
-          },
+          () => resolve(true),
           error => reject(new Error(error))
         );
       } else {
         resolve(true);
       }
     });
+  },
+
+  subscribePrivateChannel(uuid) {
+    return new Promise((resolve, reject) => {
+      const store = messageStore();
+      this.connect().then(
+        () => {
+          stompClient.subscribe("/topic/user/" + uuid, message => {
+            store.room = JSON.parse(message.body)
+          })
+        },
+      )
+        .then(() => resolve(true))
+        .catch(error => reject(error))
+    })
+
+
   },
   createRoom(clientId) {
     stompClient.send("/room/" + clientId, {})
