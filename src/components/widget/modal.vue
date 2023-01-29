@@ -30,7 +30,7 @@ export default {
       }
     },
     validName(){
-      return this.user.name?.length > 2 && this.user.name?.length < 8
+      return this.user.name?.length > 2 && this.user.name?.length < 8 && /^[A-Za-z-@]+$/.test(this.user.name)
     }
   }
 }

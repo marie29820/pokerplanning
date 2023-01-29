@@ -3,12 +3,13 @@
   <b-container class="container">
     <b-row class="text-center" align-v="center">
       <b-col cols="12">
-        <b-input-group prepend="Username" class="mt-3 inputname">
+        <b-input-group prepend="nickname" class="mt-3 inputname">
           <b-form-input
+              trim
               class="inputname"
               v-model="name"
               :state="nameState"
-              placeholder="Choisissez un pseudo de 2 a 8 caractères">
+              placeholder="Choose a nickname of 2 to 8 characters [a-z]">
           </b-form-input>
           <b-input-group-append>
             <b-button
@@ -64,8 +65,8 @@ export default {
   computed: {
     ...mapState(messageStore, ['room', 'player']),
     nameState() {
-      return this.name.length > 2 && this.name.length < 8
-    }
+      return this.name.length > 2 && this.name.length < 8 && /^[A-Za-z-@]+$/.test(this.name)
+    },
   },
   methods: {
     ...mapActions(messageStore, ['setPlayer', 'setRoom', 'setLoading']),

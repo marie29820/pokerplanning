@@ -1,16 +1,17 @@
 <template>
   <b-list-group>
     <b-list-group-item>
-      <b-button v-if="step !== 'REVEAL'"
-                variant="info"
-                @click="reveal"
-      >Montrer les cartes
-      </b-button>
-      <b-button v-if="step === 'REVEAL'"
-                variant="info"
-                @click="reset"
-      >Recommencer
-      </b-button>
+        <b-button v-if="step !== 'REVEAL'"
+                  variant="info"
+                  @click="reveal"
+        >Montrer les cartes
+        </b-button>
+        <b-button v-else
+                  variant="info"
+                  @click="reset"
+                  :disabled="!resetState"
+        >Recommencer
+        </b-button>
       <b-button
           :disabled="disabledcards"
           v-for="card in cards" :key="card"
@@ -36,6 +37,7 @@ export default {
   data() {
     return {
       clicked: {},
+      resetState: false,
       step: 'HIDDEN',
       disabledcards: false,
       cards: [
@@ -70,6 +72,7 @@ export default {
     step(step) {
       this.clicked = step === 'REVEAL' ? {} : this.clicked
       this.disabledcards = step === 'REVEAL'
+      step === 'REVEAL' ? setTimeout(() => this.resetState = true, 9000) : this.resetState = false
     },
   },
 };
@@ -81,5 +84,4 @@ export default {
   color: #007bff;
   border-color: #007bff;
 }
-
 </style>

@@ -1,32 +1,20 @@
 <template>
-  <b-navbar variant="faded" type="light">
-    <b-img left class="poker" :src="require('@/assets/poker.png')" alt="poker image"></b-img>
-    <b-img left class="title" :src="require('@/assets/logotxt.png')" alt="poker image"></b-img>
-  </b-navbar>
+  <div class="clearfix">
+    <b-img left class="poker" :src="require('@/assets/logos_transparent.png')" alt="Left image"></b-img>
+  </div>
 </template>
 
 <script>
 
 export default {
   name: "navbar",
-  data() {
-    return {
-      openInvite: false
-    }
-  },
-  methods: {
-    open() {
-      this.openInvite = true
-    }
-  }
 }
 </script>
 
 <style scoped>
 .poker {
-  width: 10%;
+  width: 15%;
 }
-
 .title {
   position: absolute;
   margin-left: 7%;
