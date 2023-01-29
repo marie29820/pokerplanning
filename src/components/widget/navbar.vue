@@ -1,6 +1,6 @@
 <template>
   <div class="clearfix">
-    <b-img left class="poker" :src="require('@/assets/logos_transparent.png')" alt="Left image"></b-img>
+    <b-img left class="poker" :src="require('@/assets/coollogo_com-12545707.png')" alt="Left image"></b-img>
   </div>
 </template>
 
