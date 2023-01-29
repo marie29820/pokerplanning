@@ -8,6 +8,7 @@
               trim
               class="inputname"
               v-model="name"
+              @keydown.enter.prevent="enter"
               :state="nameState"
               placeholder="Choose a nickname of 2 to 8 characters [a-z]">
           </b-form-input>
@@ -82,6 +83,9 @@ export default {
             )
       }
     },
+    enter(){
+      this.submit()
+    }
   }
 }
 </script>
