@@ -95,6 +95,7 @@ export default {
   font-family: 'tahoma',serif;
 }
 .container {
+  height: 100%;
   margin-top: 15%;
 }
 </style>

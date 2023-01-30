@@ -1,5 +1,8 @@
 <template>
   <invite/>
+  <div v-if="explode">
+    <explode/>
+  </div>
   <b-container>
     <b-row class="m-lg-2" align-v="center">
       <b-col class="md-12 d-flex justify-content-center" :style="{paddingTop: calculerPaddingTop()}">
@@ -61,9 +64,10 @@ import {messageStore} from "@/store";
 import Modal from "@/components/widget/modal.vue";
 import Invite from "@/components/widget/invite.vue";
 import {PLAYER_ACTION} from "@/config/wordings";
+import Explode from "@/components/widget/explode.vue";
 
 export default {
-  components: {Invite, Modal, Cards},
+  components: {Explode, Invite, Modal, Cards},
   mixins: [utils],
   data() {
     return {
@@ -73,6 +77,7 @@ export default {
       user: {id: this.uuidv4(), name: null},
       players: [],
       step: 'HIDDEN',
+      explode: false
     };
   },
   computed: {
@@ -124,6 +129,19 @@ export default {
       let vote = this.players.map(p => p.card).filter(c => !isNaN(c) && null !== c).length;
       return vote > 0 ? (total / vote).toFixed(1) : 0;
     },
+    consensus() {
+      let card;
+      for (let p in this.players) {
+        if (!isNaN(this.players[p].card) && null !== this.players[p].card) {
+          if (!card) {
+            card = this.players[p].card
+          } else if (card !== this.players[p].card) {
+            return false;
+          }
+        }
+      }
+      return true
+    },
     addPlayer(user) {
       this.user.name = user.name
       this.createPlayer();
@@ -162,6 +180,7 @@ export default {
       this.players.push(...room.players ?? [])
       this.step = room.step
       this.step === 'REVEAL' ? this.makeToast() : null;
+      this.explode = this.step === 'REVEAL' ? this.consensus() : false;
     },
   },
 };

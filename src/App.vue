@@ -26,8 +26,7 @@ export default {
   },
   created() {
     // - reinitialiser l'ensemble des données
-    window.addEventListener("beforeunload", this.leaving
-    );
+    window.addEventListener("beforeunload", this.leaving);
   },
   computed: {
     ...mapState(messageStore, ['player', 'loading'])
