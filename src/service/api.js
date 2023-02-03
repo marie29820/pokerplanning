@@ -3,8 +3,8 @@ import {Stomp} from "@stomp/stompjs";
 import {messageStore} from "@/store";
 import {utils} from "@/service/utils";
 
-// const stomp = "https://api.pokerplanningonline.com/pokerplanning/stomp"
-const stomp = "http://localhost:8080/pokerplanning/stomp"
+const stomp = "https://api.pokerplanningonline.com/pokerplanning/stomp"
+// const stomp = "http://localhost:8080/pokerplanning/stomp"
 const roomTopic = "/topic/room/"
 let stompClient = null;
 let uuid = utils.uuidv4();
