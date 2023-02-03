@@ -6,7 +6,6 @@ export const messageStore = defineStore('messages', {
       room: {},
       player: null,
       loading: false,
-
     }
   },
   actions: {
@@ -21,9 +20,6 @@ export const messageStore = defineStore('messages', {
     },
   },
   persist: {
-    enabled: {
-      storage: sessionStorage,
-      paths: ['message'],
-    },
+    enabled: true,
   },
 })

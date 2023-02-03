@@ -33,35 +33,19 @@ import {mapActions, mapState} from "pinia";
 import {messageStore} from "@/store";
 import {routesNames} from "@/config";
 import Navbar from "@/components/widget/navbar.vue";
-import {PLAYER_ACTION} from "@/config/wordings";
 
 export default {
   name: "home",
   components: {Navbar},
-  mixins: [utils],
   data() {
     return {
       name: '',
     }
   },
   async created() {
-    const store = messageStore()
-    // - si on revient sur l'ecran home (f5) ou back
     // - on reinitialise l'ensemble des données
-    if (this.room.id && this.player) {
-      await pokerPlanningApi.switchPlayer(this.room.id, this.player, PLAYER_ACTION.REMOVE);
-    }
     pokerPlanningApi.disconnect()
-    store.$reset()
-  },
-  watch: {
-    room(room) {
-      if(room.id){
-        this.setPlayer({name: this.name, id: null, connected: false})
-        this.$router.push({name: routesNames.room, params: {id: room.id}})
-        this.setLoading(false)
-      }
-    }
+    messageStore().$reset()
   },
   computed: {
     ...mapState(messageStore, ['room', 'player']),
@@ -72,18 +56,10 @@ export default {
   methods: {
     ...mapActions(messageStore, ['setPlayer', 'setRoom', 'setLoading']),
     submit() {
-      if (this.nameState) {
-        this.setLoading(true)
-        let uuid = this.uuidv4();
-        pokerPlanningApi.connect()
-            .then(() =>
-                pokerPlanningApi.subscribePrivateChannel(uuid))
-            .then(() =>
-                pokerPlanningApi.createRoom(uuid)
-            )
-      }
+      this.setPlayer({name: this.name, connected: false})
+      this.$router.push({name: routesNames.room, params: {id: utils.uuidv4()}})
     },
-    enter(){
+    enter() {
       this.submit()
     }
   }
@@ -92,8 +68,9 @@ export default {
 
 <style scoped>
 .inputname {
-  font-family: 'tahoma',serif;
+  font-family: 'tahoma', serif;
 }
+
 .container {
   height: 100%;
   margin-top: 15%;

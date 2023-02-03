@@ -29,7 +29,7 @@ export default {
   methods: {
     submit() {
       if(this.validName()){
-        this.$emit('add-player', this.user);
+        this.$emit('add-player', this.user.name);
       }
     },
     validName(){

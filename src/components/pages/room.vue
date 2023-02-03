@@ -51,30 +51,28 @@
              ref="playermodal"
              hide-footer title="Give me your name"
     >
-      <modal @add-player="addPlayer"/>
+      <modal @add-player="createPlayer"/>
     </b-modal>
   </b-container>
 </template>
 
 <script>
 import Cards from "@/components/widget/cards.vue";
-import {pokerPlanningApi, utils} from "@/service";
+import {pokerPlanningApi} from "@/service";
 import {mapActions, mapState} from "pinia";
 import {messageStore} from "@/store";
 import Modal from "@/components/widget/modal.vue";
 import Invite from "@/components/widget/invite.vue";
-import {PLAYER_ACTION} from "@/config/wordings";
 import Explode from "@/components/widget/explode.vue";
 
 export default {
   components: {Explode, Invite, Modal, Cards},
-  mixins: [utils],
   data() {
     return {
       windowHeight: window.innerHeight,
       windowWidth: window.innerWidth,
       newGame: false,
-      user: {id: this.uuidv4(), name: null},
+      user: {id: null, name: null},
       players: [],
       step: 'HIDDEN',
       explode: false
@@ -87,24 +85,24 @@ export default {
     this.setWindowSize()
     window.addEventListener('resize', this.setWindowSize)
     this.setLoading(true)
-    // - souscription des joueurs aux events de la room
-    pokerPlanningApi.subscribeRoom(this.$route.params.id).then(
-        () => {
-          if (this.player) {
-            // - si le joueur a créé la partie
-            this.step = this.room.step
-            if (!this.player.connected) {
-              this.user.name = this.player.name
-              // - ajout du player a la room
-              this.createPlayer();
-            }
-          } else {
-            // - si le joueur rejoint le game
-            this.$refs['playermodal'].show()
-          }
-          this.setLoading(false)
-        }
-    )
+    pokerPlanningApi.connect()
+        .then((uuid) => {
+          this.user.id = uuid
+          pokerPlanningApi.subscribeRoom(this.$route.params.id)
+              .then(() => {
+                this.setLoading(false)
+                this.$nextTick(() => {
+                  if (this.player) {
+                    // - si le joueur a créé la partie
+                    // - ajout du player a la room
+                    this.createPlayer(this.player.name);
+                  } else {
+                    // - si le joueur rejoint la partie
+                    this.$refs['playermodal'].show()
+                  }
+                })
+              })
+        })
   },
   beforeUnmount() {
     window.removeEventListener('resize', this.setWindowSize)
@@ -142,14 +140,14 @@ export default {
       }
       return true
     },
-    addPlayer(user) {
-      this.user.name = user.name
-      this.createPlayer();
-    },
-    async createPlayer() {
-      this.setPlayer({id: this.user.id, name: this.user.name, connected: true})
-      await pokerPlanningApi.switchPlayer(this.$route.params.id, this.player, PLAYER_ACTION.ADD)
-      this.$refs['playermodal'].hide()
+    createPlayer(name) {
+      this.user.name = name
+      pokerPlanningApi.addPlayer(this.$route.params.id, this.user).then(
+          () => {
+            this.setPlayer({id: this.user.id, name: this.user.name})
+            this.$refs['playermodal'].hide()
+          }
+      )
     },
     calculerTranslateX() {
       return 0.15 * this.windowWidth + 'px'
@@ -164,7 +162,7 @@ export default {
       return player.card ? "success" : "danger"
     },
     async updateCard(card) {
-      this.setPlayer({id: this.player.id, name: this.player.name, connected: true, card: card})
+      this.setPlayer({id: this.player.id, name: this.player.name, card: card})
       await pokerPlanningApi.play(this.room.id, this.player)
     },
     async revealCard() {
@@ -176,6 +174,7 @@ export default {
   },
   watch: {
     room(room) {
+      console.log(room)
       this.players.length = 0
       this.players.push(...room.players ?? [])
       this.step = room.step

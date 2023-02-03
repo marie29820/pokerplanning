@@ -8,7 +8,6 @@
 <script>
 
 import {pokerPlanningApi} from "@/service";
-import {PLAYER_ACTION} from "@/config/wordings";
 import {mapState} from "pinia";
 import {messageStore} from "@/store";
 
@@ -33,16 +32,9 @@ export default {
   },
   methods: {
     async leaving() {
-      const store = messageStore()
-      if (this.$route.params.id && this.player) {
-        // - supprimer le user du groupe
-        pokerPlanningApi.switchPlayer(this.$route.params.id, this.player, PLAYER_ACTION.REMOVE).then(
-            // - se deconencter de la socket
-            () => pokerPlanningApi.disconnect()
-        )
-      }
-      // - vider le store
-      store.$reset()
+      // - vider le store et se deconnecter
+      pokerPlanningApi.disconnect()
+      messageStore().$reset()
     },
   }
 }
